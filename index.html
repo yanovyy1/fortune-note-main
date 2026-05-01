@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune Note | Художественный проект</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #map-container { width: 100%; height: 60vh; cursor: grab; }
+    </style>
+</head>
+<body class="bg-dark text-gray-200 font-sans antialiased">
+
+    <nav class="fixed w-full bg-black/80 backdrop-blur-md z-50 p-4 border-b border-gray-800">
+        <div class="max-w-6xl mx-auto flex justify-center items-center relative">
+            <a href="#" class="absolute left-4 text-xl font-bold tracking-widest text-white hidden lg:block">FORTUNE NOTE</a>
+            <div class="flex space-x-6 md:space-x-8 text-sm md:text-base font-medium">
+                <a href="#about" class="hover:text-white transition-colors">О проекте</a>
+                <a href="#map" class="hover:text-white transition-colors">Карта</a>
+                <a href="#gallery" class="hover:text-white transition-colors">Галерея</a>
+                <a href="#roadmap" class="hover:text-white transition-colors">Роадмап</a>
+                <a href="#contacts" class="hover:text-white transition-colors">Контакты</a>
+            </div>
+        </div>
+    </nav>
+
+    <section id="about" class="min-h-screen flex flex-col justify-center items-center px-4 pt-20">
+        <div class="max-w-3xl text-center">
+            <h1 class="text-5xl md:text-8xl font-bold mb-8 text-white uppercase tracking-tighter">Fortune Note</h1>
+            <p class="text-gray-400 text-lg md:text-xl leading-relaxed">
+                Художественный проект, исследующий грани вымышленного мира. Здесь вы найдете историю вселенной, интерактивные атласы и архивы технологических достижений.
+            </p>
+        </div>
+    </section>
+
+    <section id="map" class="py-24 border-t border-gray-900 flex flex-col items-center">
+        <div class="max-w-6xl w-full px-4 text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Мир проекта</h2>
+            <p class="text-gray-500">Исследуйте локации Fortune Note в 3D пространстве</p>
+        </div>
+        <div class="w-full max-w-5xl px-4">
+            <div id="map-container" class="bg-zinc-900/50 rounded-2xl border border-gray-800 overflow-hidden">
+                </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="py-24 border-t border-gray-900 flex flex-col items-center px-4">
+        <div class="max-w-6xl w-full text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-10">Галерея</h2>
+            
+            <div id="gallery-filters" class="flex flex-wrap justify-center gap-3 mb-12 text-sm">
+                <button class="px-6 py-2 bg-white text-black rounded-full">Все</button>
+                <button class="px-6 py-2 border border-gray-700 hover:border-white rounded-full transition">Персонажи</button>
+                <button class="px-6 py-2 border border-gray-700 hover:border-white rounded-full transition">Локации</button>
+                <button class="px-6 py-2 border border-gray-700 hover:border-white rounded-full transition">Технологии</button>
+            </div>
+
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="aspect-square bg-zinc-900 rounded-lg border border-gray-800"></div>
+                <div class="aspect-square bg-zinc-900 rounded-lg border border-gray-800"></div>
+                <div class="aspect-square bg-zinc-900 rounded-lg border border-gray-800"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="py-24 border-t border-gray-900 flex flex-col items-center px-4">
+        <div class="max-w-2xl w-full">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-12 text-center">Роадмап</h2>
+            <div class="space-y-12 relative before:absolute before:left-1/2 before:w-px before:h-full before:bg-gray-800 before:-translate-x-1/2">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-4 h-4 bg-white rounded-full z-10 mb-4"></div>
+                    <div class="text-center bg-zinc-900 p-6 rounded-xl border border-gray-800 w-full">
+                        <h3 class="text-white font-bold mb-2">Этап 1: Запуск архива</h3>
+                        <p class="text-gray-500 text-sm">Публикация первых концепт-артов и лора основных персонажей.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacts" class="py-24 border-t border-gray-900 flex flex-col items-center px-4 bg-zinc-950/50">
+        <div class="max-w-3xl text-center">
+            <h2 class="text-3xl font-bold text-white mb-8">Связь с проектом</h2>
+            <div class="flex justify-center gap-8 text-gray-400">
+                <a href="#" class="hover:text-white underline underline-offset-8 transition-all">Telegram</a>
+                <a href="#" class="hover:text-white underline underline-offset-8 transition-all">VK</a>
+                <a href="#" class="hover:text-white underline underline-offset-8 transition-all">ArtStation</a>
+            </div>
+            <p class="mt-12 text-xs text-gray-600 uppercase tracking-widest">© 2026 Fortune Note Project</p>
+        </div>
+    </section>
+
+</body>
+</html>
