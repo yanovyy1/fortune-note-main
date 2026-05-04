@@ -16,21 +16,6 @@
             }
         }
     </script>
-    <style>
-        /* Стили для динамического тумана по краям карты */
-        .fog-overlay {
-            background: radial-gradient(circle at center, transparent 35%, rgba(10, 10, 10, 0.6) 75%, #0a0a0a 100%);
-            animation: fogPulse 8s infinite alternate ease-in-out;
-        }
-        @keyframes fogPulse {
-            0% { opacity: 0.7; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
-        /* Плавность для слоя с картой */
-        #map-content {
-            will-change: transform;
-        }
-    </style>
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased">
 
@@ -85,36 +70,30 @@
             <p class="text-gray-500">Интерактивный атлас локаций и биомов</p>
         </div>
         <div class="w-full max-w-5xl px-4">
-            
             <!-- Контейнер для 2D карты -->
-            <div id="map-viewport" class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden cursor-pointer group/viewport">
+            <div id="map-container" class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden cursor-crosshair">
                 
-                <!-- Слой динамического тумана -->
-                <div class="fog-overlay absolute inset-0 z-20 pointer-events-none"></div>
-
-                <!-- Контейнер контента карты (для зума и параллакса) -->
-                <div id="map-content" class="absolute inset-0 w-full h-full transition-transform duration-700 ease-in-out origin-center z-10">
+                <!-- Слой карты (двигается при параллаксе) -->
+                <div id="map-layer" class="absolute inset-0 w-full h-full transition-transform duration-100 ease-out will-change-transform origin-center" style="transform: scale(1.15);">
+                    
                     <!-- Фоновое изображение карты -->
                     <img src="assets/img/fortune-note-map.jpeg" 
                          alt="Карта мира Fortune Note" 
                          class="absolute inset-0 w-full h-full object-cover">
                     
-                    <!-- Маркер 1 -->
-                    <!-- Параметры top/left задаются в style, а data-x/data-y используются в скрипте для зума -->
-                    <button class="map-marker absolute w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-30 group" 
-                            style="top: 25%; left: 50%;" 
-                            data-x="50" data-y="25" 
-                            title="Северный материк">
+                    <!-- Маркер 1. Добавлены атрибуты data-x и data-y -->
+                    <button class="map-marker absolute top-[25%] left-[50%] w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" 
+                            title="Северный материк" 
+                            data-x="50" data-y="25">
                         <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
                             Северный материк
                         </span>
                     </button>
 
                     <!-- Маркер 2 -->
-                    <button class="map-marker absolute w-3 h-3 bg-white/60 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-30 group" 
-                            style="top: 55%; left: 25%;" 
-                            data-x="25" data-y="55" 
-                            title="Западные леса">
+                    <button class="map-marker absolute top-[55%] left-[25%] w-3 h-3 bg-white/60 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" 
+                            title="Западные леса" 
+                            data-x="25" data-y="55">
                         <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
                             Западные леса
                         </span>
@@ -123,7 +102,7 @@
             </div>
             
             <div class="mt-6 text-center text-sm text-gray-500">
-                Нажмите на маркер для приближения. Нажмите в любую область карты для отдаления.
+                Наведите курсор для смещения. Нажмите на маркер для приближения области.
             </div>
         </div>
     </section>
@@ -134,7 +113,6 @@
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Магазин <span class="text-sm text-gray-500 align-top uppercase tracking-wider">(WIP)</span></h2>
             <p class="text-gray-500 mb-12">Коллекционные карточки и материалы проекта</p>
             
-            <!-- Сетка 5x2 -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <!-- Строка 1 -->
                 <div class="aspect-[3/4] bg-zinc-900 rounded-lg border border-gray-800 flex items-center justify-center text-gray-700">Товар 1</div>
@@ -197,57 +175,68 @@
         </div>
     </section>
 
-    <!-- Скрипт логики карты -->
+    <!-- Скрипт карты -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const mapViewport = document.getElementById('map-viewport');
-            const mapContent = document.getElementById('map-content');
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('map-container');
+            const layer = document.getElementById('map-layer');
             const markers = document.querySelectorAll('.map-marker');
+            
             let isZoomed = false;
-
-            // Обработчик параллакса при скролле
-            window.addEventListener('scroll', () => {
-                // Отключаем параллакс, если карта приближена
-                if (isZoomed) return;
-
-                const rect = mapViewport.getBoundingClientRect();
-                const viewHeight = window.innerHeight;
+            const baseScale = 1.15; // Стартовое увеличение для скрытия границ
+            const zoomScale = 1.25; // Увеличение при клике на область
+            
+            // Логика параллакса
+            container.addEventListener('mousemove', (e) => {
+                if (isZoomed) return; // Отключаем параллакс при фокусе на области
                 
-                // Рассчитываем смещение только когда карта находится в зоне видимости
-                if (rect.top <= viewHeight && rect.bottom >= 0) {
-                    const offset = (rect.top - viewHeight / 2) * 0.15; // Коэффициент 0.15 определяет силу эффекта
-                    mapContent.style.transform = `translateY(${offset}px) scale(1)`;
-                }
+                const rect = container.getBoundingClientRect();
+                // Вычисляем позицию мыши от -0.5 до 0.5
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                
+                // Максимальное смещение 4%. При базовом масштабе 1.15 это скрывает границы.
+                const moveX = x * -4;
+                const moveY = y * -4;
+                
+                layer.style.transform = `scale(${baseScale}) translate(${moveX}%, ${moveY}%)`;
             });
 
-            // Обработчик зума при клике на маркер
+            // Возврат в центр при уходе курсора
+            container.addEventListener('mouseleave', () => {
+                if (isZoomed) return;
+                layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
+            });
+
+            // Логика клика по маркеру
             markers.forEach(marker => {
                 marker.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Предотвращаем срабатывание клика по самой карте
+                    e.stopPropagation(); // Предотвращаем срабатывание клика по контейнеру
                     
                     const x = marker.getAttribute('data-x');
                     const y = marker.getAttribute('data-y');
-
-                    if (isZoomed) {
-                        // Если уже приближено - отдаляем
-                        mapContent.style.transformOrigin = `center center`;
-                        mapContent.style.transform = `translateY(0) scale(1)`;
-                        isZoomed = false;
-                    } else {
-                        // Приближаем к координатам маркера
-                        mapContent.style.transformOrigin = `${x}% ${y}%`;
-                        mapContent.style.transform = `scale(2.2)`; // Коэффициент масштаба
-                        isZoomed = true;
-                    }
+                    
+                    isZoomed = true;
+                    // Увеличиваем длительность анимации для плавного зума
+                    layer.style.transitionDuration = '500ms'; 
+                    // Смещаем точку трансформации к координатам маркера
+                    layer.style.transformOrigin = `${x}% ${y}%`;
+                    layer.style.transform = `scale(${zoomScale}) translate(0%, 0%)`;
                 });
             });
 
-            // Обработчик отдаления при клике в любое место карты (кроме маркеров)
-            mapViewport.addEventListener('click', () => {
+            // Сброс зума при клике на любую область карты вне маркера
+            container.addEventListener('click', () => {
                 if (isZoomed) {
-                    mapContent.style.transformOrigin = `center center`;
-                    mapContent.style.transform = `translateY(0) scale(1)`;
                     isZoomed = false;
+                    layer.style.transitionDuration = '500ms';
+                    layer.style.transformOrigin = 'center center';
+                    layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
+                    
+                    // Возвращаем исходную скорость для параллакса после завершения отдаления
+                    setTimeout(() => {
+                        if (!isZoomed) layer.style.transitionDuration = '100ms';
+                    }, 500);
                 }
             });
         });
