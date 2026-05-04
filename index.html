@@ -17,7 +17,7 @@
         }
     </script>
     <style>
-        /* Эффект глитча и плавления для заголовка */
+        /* Эффект глитча и плавления для главного заголовка */
         .glitch-wrapper {
             position: relative;
             display: inline-block;
@@ -41,13 +41,11 @@
             pointer-events: none;
             transition: opacity 0.4s ease;
         }
-        /* Красный канал */
         .glitch-wrapper::before {
             color: #ff003c;
             z-index: -1;
             mix-blend-mode: screen;
         }
-        /* Синий канал */
         .glitch-wrapper::after {
             color: #00ffff;
             z-index: -2;
@@ -74,6 +72,103 @@
             0% { transform: scaleY(1) translateY(0); filter: blur(0); }
             100% { transform: scaleY(1.03) translateY(3px); filter: blur(0.5px); text-shadow: 0 4px 10px rgba(255,255,255,0.2); }
         }
+
+        /* Эффект глитча для панели навигации (сильнее и плавнее) */
+        .glitch-nav-wrapper {
+            position: relative;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .glitch-nav-text {
+            display: block;
+            transition: transform 0.6s ease, filter 0.6s ease;
+        }
+        .glitch-nav-wrapper:hover .glitch-nav-text {
+            animation: melt-nav-text 3.5s infinite alternate ease-in-out;
+        }
+        .glitch-nav-wrapper::before,
+        .glitch-nav-wrapper::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+        }
+        .glitch-nav-wrapper::before {
+            color: #ff003c;
+            z-index: -1;
+            mix-blend-mode: screen;
+        }
+        .glitch-nav-wrapper::after {
+            color: #00ffff;
+            z-index: -2;
+            mix-blend-mode: screen;
+        }
+        .glitch-nav-wrapper:hover::before {
+            opacity: 0.9;
+            animation: nav-chrom-ab-1 3s infinite alternate ease-in-out;
+        }
+        .glitch-nav-wrapper:hover::after {
+            opacity: 0.9;
+            animation: nav-chrom-ab-2 3s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes nav-chrom-ab-1 {
+            0% { transform: translate(-2px, 1px) scaleY(1.02) skewX(2deg); filter: blur(2px); }
+            100% { transform: translate(-8px, 4px) scaleY(1.08) skewX(-4deg); filter: blur(5px); }
+        }
+        @keyframes nav-chrom-ab-2 {
+            0% { transform: translate(2px, -1px) scaleY(1.02) skewX(-2deg); filter: blur(2px); }
+            100% { transform: translate(8px, -3px) scaleY(1.08) skewX(4deg); filter: blur(4px); }
+        }
+        @keyframes melt-nav-text {
+            0% { transform: scaleY(1) translateY(0); filter: blur(0); }
+            100% { transform: scaleY(1.1) translateY(5px); filter: blur(1.5px); text-shadow: 0 4px 15px rgba(255,255,255,0.4); }
+        }
+
+        /* Динамический туман для карты */
+        .map-fog {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 20;
+            box-shadow: inset 0 0 100px 50px rgba(10, 10, 10, 0.95);
+            background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(10, 10, 10, 0.7) 80%, #0a0a0a 100%);
+            animation: fog-pulse 8s infinite alternate ease-in-out;
+        }
+        .map-fog::before, .map-fog::after {
+            content: '';
+            position: absolute;
+            inset: -20%;
+            pointer-events: none;
+        }
+        .map-fog::before {
+            background: radial-gradient(circle at 30% 70%, rgba(20, 20, 20, 0.6) 0%, transparent 35%),
+                        radial-gradient(circle at 70% 30%, rgba(20, 20, 20, 0.6) 0%, transparent 35%);
+            animation: cloud-drift 18s infinite alternate ease-in-out;
+        }
+        .map-fog::after {
+            background: radial-gradient(circle at 20% 20%, rgba(30, 30, 30, 0.5) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(30, 30, 30, 0.5) 0%, transparent 40%);
+            animation: cloud-drift-reverse 22s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes fog-pulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        @keyframes cloud-drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(6%, 4%) scale(1.15); }
+        }
+        @keyframes cloud-drift-reverse {
+            0% { transform: translate(0, 0) scale(1.15); }
+            100% { transform: translate(-6%, -4%) scale(1); }
+        }
     </style>
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased">
@@ -82,12 +177,24 @@
         <div class="max-w-6xl mx-auto flex justify-center items-center relative">
             <a href="#" class="absolute left-4 text-xl font-bold tracking-widest text-white hidden lg:block">FORTUNE NOTE</a>
             <div class="flex space-x-6 md:space-x-8 text-sm md:text-base font-medium">
-                <a href="#about" class="hover:text-white transition-colors">О проекте</a>
-                <a href="#gallery" class="hover:text-white transition-colors">Галерея</a>
-                <a href="#map" class="hover:text-white transition-colors">Карта</a>
-                <a href="#shop" class="hover:text-white transition-colors">Магазин</a>
-                <a href="#roadmap" class="hover:text-white transition-colors">Роадмап</a>
-                <a href="#contacts" class="hover:text-white transition-colors">Контакты</a>
+                <a href="#about" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="О проекте">
+                    <span class="glitch-nav-text">О проекте</span>
+                </a>
+                <a href="#gallery" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="Галерея">
+                    <span class="glitch-nav-text">Галерея</span>
+                </a>
+                <a href="#map" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="Карта">
+                    <span class="glitch-nav-text">Карта</span>
+                </a>
+                <a href="#shop" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="Магазин">
+                    <span class="glitch-nav-text">Магазин</span>
+                </a>
+                <a href="#roadmap" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="Роадмап">
+                    <span class="glitch-nav-text">Роадмап</span>
+                </a>
+                <a href="#contacts" class="glitch-nav-wrapper text-gray-200 hover:text-white transition-colors" data-text="Контакты">
+                    <span class="glitch-nav-text">Контакты</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -160,6 +267,9 @@
                         </span>
                     </button>
                 </div>
+
+                <!-- Слой тумана/облаков -->
+                <div class="map-fog"></div>
             </div>
             
             <div class="mt-6 text-center text-sm text-gray-500">
@@ -245,13 +355,11 @@
             
             let isZoomed = false;
             const baseScale = 1.15; 
-            const zoomScale = 1.4; // Масштаб при клике
+            const zoomScale = 1.4;
             
-            // Вычисление максимального смещения, чтобы края карты не попадали в видимую зону
             const maxTx = ((zoomScale - 1) / 2) * 100;
             const maxTy = ((zoomScale - 1) / 2) * 100;
 
-            // Логика параллакса
             container.addEventListener('mousemove', (e) => {
                 if (isZoomed) return;
                 
@@ -265,13 +373,11 @@
                 layer.style.transform = `scale(${baseScale}) translate(${moveX}%, ${moveY}%)`;
             });
 
-            // Возврат в центр при уходе курсора
             container.addEventListener('mouseleave', () => {
                 if (isZoomed) return;
                 layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
             });
 
-            // Плавное приближение при клике на маркер
             markers.forEach(marker => {
                 marker.addEventListener('click', (e) => {
                     e.stopPropagation(); 
@@ -283,20 +389,16 @@
                     layer.style.transitionDuration = '800ms'; 
                     layer.style.transitionTimingFunction = 'cubic-bezier(0.25, 1, 0.5, 1)';
                     
-                    // Вычисление нужного смещения для центрирования маркера
                     let tx = 50 - markerX;
                     let ty = 50 - markerY;
                     
-                    // Ограничение смещения, чтобы не было видно пустых краев контейнера
                     tx = Math.max(-maxTx, Math.min(tx, maxTx));
                     ty = Math.max(-maxTy, Math.min(ty, maxTy));
                     
-                    // Применяем трансформацию. Translate делится на scale для точного позиционирования
                     layer.style.transform = `scale(${zoomScale}) translate(${tx / zoomScale}%, ${ty / zoomScale}%)`;
                 });
             });
 
-            // Сброс зума при клике на саму карту
             container.addEventListener('click', () => {
                 if (isZoomed) {
                     isZoomed = false;
@@ -304,7 +406,6 @@
                     layer.style.transitionTimingFunction = 'cubic-bezier(0.25, 1, 0.5, 1)';
                     layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
                     
-                    // Возвращаем исходную скорость для легкого параллакса после завершения анимации
                     setTimeout(() => {
                         if (!isZoomed) {
                             layer.style.transitionDuration = '100ms';
