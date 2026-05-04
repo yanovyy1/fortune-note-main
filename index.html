@@ -63,7 +63,7 @@
         </div>
     </section>
 
-    <!-- Интерактивная карта 2D -->
+<!-- Интерактивная карта 2D -->
     <section id="map" class="py-24 border-t border-gray-900 flex flex-col items-center">
         <div class="max-w-6xl w-full px-4 text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Карта мира</h2>
@@ -71,19 +71,31 @@
         </div>
         <div class="w-full max-w-5xl px-4">
             <!-- Контейнер для 2D карты -->
-            <div class="relative w-full aspect-video bg-zinc-900/50 rounded-2xl border border-gray-800 overflow-hidden">
-                <!-- Место для фонового изображения или SVG карты -->
-                <div class="absolute inset-0 flex items-center justify-center text-gray-700 text-sm">
-                    [Фон: Изображение карты или интерактивный SVG]
-                </div>
+            <div class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden">
+                <!-- Фоновое изображение карты -->
+                <img src="https://storage.googleapis.com/file-transfer-gemini/269b2d88-ec99-4c12-9c10-09b36edaa0c6.jpeg" 
+                     alt="Карта мира Fortune Note" 
+                     class="absolute inset-0 w-full h-full object-cover">
                 
-                <!-- Пример иконки города/локации -->
-                <button class="absolute top-1/3 left-1/4 w-4 h-4 bg-white rounded-full hover:scale-150 transition-transform cursor-pointer group" title="Название города">
-                    <!-- Будущая всплывающая подсказка при наведении -->
-                    <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black text-white text-xs py-1 px-2 rounded">
-                        Город 1
+                <!-- Пример интерактивного маркера -->
+                <button class="absolute top-[25%] left-[50%] w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" title="Северный материк">
+                    <!-- Всплывающая подсказка -->
+                    <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
+                        Северный материк
                     </span>
                 </button>
+
+                <!-- Еще один пример маркера на западном континенте -->
+                <button class="absolute top-[55%] left-[25%] w-3 h-3 bg-white/60 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" title="Западные леса">
+                    <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
+                        Западные леса
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Инструкция/заглушка для описания -->
+            <div class="mt-6 text-center text-sm text-gray-500">
+                Наведите курсор на маркеры, чтобы увидеть названия областей.
             </div>
         </div>
     </section>
