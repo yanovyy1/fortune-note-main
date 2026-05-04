@@ -16,6 +16,65 @@
             }
         }
     </script>
+    <style>
+        /* Эффект глитча и плавления для заголовка */
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch-text {
+            display: block;
+            transition: transform 0.4s ease, filter 0.4s ease;
+        }
+        .glitch-wrapper:hover .glitch-text {
+            animation: melt-text 2s infinite alternate ease-in-out;
+        }
+        .glitch-wrapper::before,
+        .glitch-wrapper::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        /* Красный канал */
+        .glitch-wrapper::before {
+            color: #ff003c;
+            z-index: -1;
+            mix-blend-mode: screen;
+        }
+        /* Синий канал */
+        .glitch-wrapper::after {
+            color: #00ffff;
+            z-index: -2;
+            mix-blend-mode: screen;
+        }
+        .glitch-wrapper:hover::before {
+            opacity: 0.8;
+            animation: chrom-ab-1 1.5s infinite alternate ease-in-out;
+        }
+        .glitch-wrapper:hover::after {
+            opacity: 0.8;
+            animation: chrom-ab-2 1.5s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes chrom-ab-1 {
+            0% { transform: translate(-2px, 1px) scaleY(1.01) skewX(1deg); filter: blur(1px); }
+            100% { transform: translate(-5px, 4px) scaleY(1.04) skewX(-2deg); filter: blur(2px); }
+        }
+        @keyframes chrom-ab-2 {
+            0% { transform: translate(2px, -1px) scaleY(1.01) skewX(-1deg); filter: blur(1px); }
+            100% { transform: translate(5px, 2px) scaleY(1.03) skewX(2deg); filter: blur(1.5px); }
+        }
+        @keyframes melt-text {
+            0% { transform: scaleY(1) translateY(0); filter: blur(0); }
+            100% { transform: scaleY(1.03) translateY(3px); filter: blur(0.5px); text-shadow: 0 4px 10px rgba(255,255,255,0.2); }
+        }
+    </style>
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased">
 
@@ -36,7 +95,9 @@
     <!-- О проекте -->
     <section id="about" class="min-h-screen flex flex-col justify-center items-center px-4 pt-20">
         <div class="max-w-3xl text-center">
-            <h1 class="text-5xl md:text-8xl font-bold mb-8 text-white uppercase tracking-tighter">Fortune Note</h1>
+            <h1 class="glitch-wrapper text-5xl md:text-8xl font-bold mb-8 text-white uppercase tracking-tighter" data-text="Fortune Note">
+                <span class="glitch-text">Fortune Note</span>
+            </h1>
             <p class="text-gray-400 text-lg md:text-xl leading-relaxed">
                 Художественный проект, исследующий грани вымышленного мира. Здесь вы найдете историю вселенной, интерактивные атласы и архивы технологических достижений.
             </p>
@@ -73,15 +134,15 @@
             <!-- Контейнер для 2D карты -->
             <div id="map-container" class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden cursor-crosshair">
                 
-                <!-- Слой карты (двигается при параллаксе) -->
-                <div id="map-layer" class="absolute inset-0 w-full h-full transition-transform duration-100 ease-out will-change-transform origin-center" style="transform: scale(1.15);">
+                <!-- Слой карты -->
+                <div id="map-layer" class="absolute inset-0 w-full h-full transition-transform duration-100 ease-out will-change-transform" style="transform: scale(1.15);">
                     
                     <!-- Фоновое изображение карты -->
                     <img src="assets/img/fortune-note-map.jpeg" 
                          alt="Карта мира Fortune Note" 
                          class="absolute inset-0 w-full h-full object-cover">
                     
-                    <!-- Маркер 1. Добавлены атрибуты data-x и data-y -->
+                    <!-- Маркер 1 -->
                     <button class="map-marker absolute top-[25%] left-[50%] w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" 
                             title="Северный материк" 
                             data-x="50" data-y="25">
@@ -183,19 +244,21 @@
             const markers = document.querySelectorAll('.map-marker');
             
             let isZoomed = false;
-            const baseScale = 1.15; // Стартовое увеличение для скрытия границ
-            const zoomScale = 1.25; // Увеличение при клике на область
+            const baseScale = 1.15; 
+            const zoomScale = 1.4; // Масштаб при клике
             
+            // Вычисление максимального смещения, чтобы края карты не попадали в видимую зону
+            const maxTx = ((zoomScale - 1) / 2) * 100;
+            const maxTy = ((zoomScale - 1) / 2) * 100;
+
             // Логика параллакса
             container.addEventListener('mousemove', (e) => {
-                if (isZoomed) return; // Отключаем параллакс при фокусе на области
+                if (isZoomed) return;
                 
                 const rect = container.getBoundingClientRect();
-                // Вычисляем позицию мыши от -0.5 до 0.5
                 const x = (e.clientX - rect.left) / rect.width - 0.5;
                 const y = (e.clientY - rect.top) / rect.height - 0.5;
                 
-                // Максимальное смещение 4%. При базовом масштабе 1.15 это скрывает границы.
                 const moveX = x * -4;
                 const moveY = y * -4;
                 
@@ -208,35 +271,46 @@
                 layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
             });
 
-            // Логика клика по маркеру
+            // Плавное приближение при клике на маркер
             markers.forEach(marker => {
                 marker.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Предотвращаем срабатывание клика по контейнеру
+                    e.stopPropagation(); 
                     
-                    const x = marker.getAttribute('data-x');
-                    const y = marker.getAttribute('data-y');
+                    const markerX = parseFloat(marker.getAttribute('data-x'));
+                    const markerY = parseFloat(marker.getAttribute('data-y'));
                     
                     isZoomed = true;
-                    // Увеличиваем длительность анимации для плавного зума
-                    layer.style.transitionDuration = '500ms'; 
-                    // Смещаем точку трансформации к координатам маркера
-                    layer.style.transformOrigin = `${x}% ${y}%`;
-                    layer.style.transform = `scale(${zoomScale}) translate(0%, 0%)`;
+                    layer.style.transitionDuration = '800ms'; 
+                    layer.style.transitionTimingFunction = 'cubic-bezier(0.25, 1, 0.5, 1)';
+                    
+                    // Вычисление нужного смещения для центрирования маркера
+                    let tx = 50 - markerX;
+                    let ty = 50 - markerY;
+                    
+                    // Ограничение смещения, чтобы не было видно пустых краев контейнера
+                    tx = Math.max(-maxTx, Math.min(tx, maxTx));
+                    ty = Math.max(-maxTy, Math.min(ty, maxTy));
+                    
+                    // Применяем трансформацию. Translate делится на scale для точного позиционирования
+                    layer.style.transform = `scale(${zoomScale}) translate(${tx / zoomScale}%, ${ty / zoomScale}%)`;
                 });
             });
 
-            // Сброс зума при клике на любую область карты вне маркера
+            // Сброс зума при клике на саму карту
             container.addEventListener('click', () => {
                 if (isZoomed) {
                     isZoomed = false;
-                    layer.style.transitionDuration = '500ms';
-                    layer.style.transformOrigin = 'center center';
+                    layer.style.transitionDuration = '800ms';
+                    layer.style.transitionTimingFunction = 'cubic-bezier(0.25, 1, 0.5, 1)';
                     layer.style.transform = `scale(${baseScale}) translate(0%, 0%)`;
                     
-                    // Возвращаем исходную скорость для параллакса после завершения отдаления
+                    // Возвращаем исходную скорость для легкого параллакса после завершения анимации
                     setTimeout(() => {
-                        if (!isZoomed) layer.style.transitionDuration = '100ms';
-                    }, 500);
+                        if (!isZoomed) {
+                            layer.style.transitionDuration = '100ms';
+                            layer.style.transitionTimingFunction = 'ease-out';
+                        }
+                    }, 800);
                 }
             });
         });
