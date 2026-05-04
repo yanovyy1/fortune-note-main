@@ -16,6 +16,21 @@
             }
         }
     </script>
+    <style>
+        /* Стили для динамического тумана по краям карты */
+        .fog-overlay {
+            background: radial-gradient(circle at center, transparent 35%, rgba(10, 10, 10, 0.6) 75%, #0a0a0a 100%);
+            animation: fogPulse 8s infinite alternate ease-in-out;
+        }
+        @keyframes fogPulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+        /* Плавность для слоя с картой */
+        #map-content {
+            will-change: transform;
+        }
+    </style>
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased">
 
@@ -63,39 +78,52 @@
         </div>
     </section>
 
-<!-- Интерактивная карта 2D -->
+    <!-- Интерактивная карта 2D -->
     <section id="map" class="py-24 border-t border-gray-900 flex flex-col items-center">
         <div class="max-w-6xl w-full px-4 text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Карта мира</h2>
             <p class="text-gray-500">Интерактивный атлас локаций и биомов</p>
         </div>
         <div class="w-full max-w-5xl px-4">
+            
             <!-- Контейнер для 2D карты -->
-            <div class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden">
-                <!-- Фоновое изображение карты -->
-                <img src="assets/img/fortune-note-map.jpeg" 
-                     alt="Карта мира Fortune Note" 
-                     class="absolute inset-0 w-full h-full object-cover">
+            <div id="map-viewport" class="relative w-full aspect-video bg-black rounded-2xl border border-gray-800 overflow-hidden cursor-pointer group/viewport">
                 
-                <!-- Пример интерактивного маркера -->
-                <button class="absolute top-[25%] left-[50%] w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" title="Северный материк">
-                    <!-- Всплывающая подсказка -->
-                    <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
-                        Северный материк
-                    </span>
-                </button>
+                <!-- Слой динамического тумана -->
+                <div class="fog-overlay absolute inset-0 z-20 pointer-events-none"></div>
 
-                <!-- Еще один пример маркера на западном континенте -->
-                <button class="absolute top-[55%] left-[25%] w-3 h-3 bg-white/60 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-10 group" title="Западные леса">
-                    <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
-                        Западные леса
-                    </span>
-                </button>
+                <!-- Контейнер контента карты (для зума и параллакса) -->
+                <div id="map-content" class="absolute inset-0 w-full h-full transition-transform duration-700 ease-in-out origin-center z-10">
+                    <!-- Фоновое изображение карты -->
+                    <img src="assets/img/fortune-note-map.jpeg" 
+                         alt="Карта мира Fortune Note" 
+                         class="absolute inset-0 w-full h-full object-cover">
+                    
+                    <!-- Маркер 1 -->
+                    <!-- Параметры top/left задаются в style, а data-x/data-y используются в скрипте для зума -->
+                    <button class="map-marker absolute w-4 h-4 bg-white/80 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-30 group" 
+                            style="top: 25%; left: 50%;" 
+                            data-x="50" data-y="25" 
+                            title="Северный материк">
+                        <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
+                            Северный материк
+                        </span>
+                    </button>
+
+                    <!-- Маркер 2 -->
+                    <button class="map-marker absolute w-3 h-3 bg-white/60 hover:bg-white rounded-full hover:scale-150 transition-all cursor-pointer z-30 group" 
+                            style="top: 55%; left: 25%;" 
+                            data-x="25" data-y="55" 
+                            title="Западные леса">
+                        <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/90 text-white text-xs py-1 px-2 rounded backdrop-blur-sm border border-gray-800">
+                            Западные леса
+                        </span>
+                    </button>
+                </div>
             </div>
             
-            <!-- Инструкция/заглушка для описания -->
             <div class="mt-6 text-center text-sm text-gray-500">
-                Наведите курсор на маркеры, чтобы увидеть названия областей.
+                Нажмите на маркер для приближения. Нажмите в любую область карты для отдаления.
             </div>
         </div>
     </section>
@@ -106,7 +134,7 @@
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Магазин <span class="text-sm text-gray-500 align-top uppercase tracking-wider">(WIP)</span></h2>
             <p class="text-gray-500 mb-12">Коллекционные карточки и материалы проекта</p>
             
-            <!-- Сетка 5x2 для больших экранов -->
+            <!-- Сетка 5x2 -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <!-- Строка 1 -->
                 <div class="aspect-[3/4] bg-zinc-900 rounded-lg border border-gray-800 flex items-center justify-center text-gray-700">Товар 1</div>
@@ -169,5 +197,60 @@
         </div>
     </section>
 
+    <!-- Скрипт логики карты -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const mapViewport = document.getElementById('map-viewport');
+            const mapContent = document.getElementById('map-content');
+            const markers = document.querySelectorAll('.map-marker');
+            let isZoomed = false;
+
+            // Обработчик параллакса при скролле
+            window.addEventListener('scroll', () => {
+                // Отключаем параллакс, если карта приближена
+                if (isZoomed) return;
+
+                const rect = mapViewport.getBoundingClientRect();
+                const viewHeight = window.innerHeight;
+                
+                // Рассчитываем смещение только когда карта находится в зоне видимости
+                if (rect.top <= viewHeight && rect.bottom >= 0) {
+                    const offset = (rect.top - viewHeight / 2) * 0.15; // Коэффициент 0.15 определяет силу эффекта
+                    mapContent.style.transform = `translateY(${offset}px) scale(1)`;
+                }
+            });
+
+            // Обработчик зума при клике на маркер
+            markers.forEach(marker => {
+                marker.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Предотвращаем срабатывание клика по самой карте
+                    
+                    const x = marker.getAttribute('data-x');
+                    const y = marker.getAttribute('data-y');
+
+                    if (isZoomed) {
+                        // Если уже приближено - отдаляем
+                        mapContent.style.transformOrigin = `center center`;
+                        mapContent.style.transform = `translateY(0) scale(1)`;
+                        isZoomed = false;
+                    } else {
+                        // Приближаем к координатам маркера
+                        mapContent.style.transformOrigin = `${x}% ${y}%`;
+                        mapContent.style.transform = `scale(2.2)`; // Коэффициент масштаба
+                        isZoomed = true;
+                    }
+                });
+            });
+
+            // Обработчик отдаления при клике в любое место карты (кроме маркеров)
+            mapViewport.addEventListener('click', () => {
+                if (isZoomed) {
+                    mapContent.style.transformOrigin = `center center`;
+                    mapContent.style.transform = `translateY(0) scale(1)`;
+                    isZoomed = false;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
